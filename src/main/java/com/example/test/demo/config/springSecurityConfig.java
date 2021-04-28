@@ -85,11 +85,12 @@ public class springSecurityConfig extends WebSecurityConfigurerAdapter {
          * 使用时 hasAuthority()、hasAnyAuthority() 或者 hasAnyRole()、hasAnyAuthority() 任选一对即可，同时使用四种可能会出现问题。
          */
         http.authorizeRequests()
-                .antMatchers("/test/hello").hasAuthority("user")
+                //.antMatchers("/").hasAuthority("user")
                 //.antMatchers("/test/hello").hasAnyRole("USER,GOD")
                 //.antMatchers("/test/hello").hasRole("GOD")
-                .antMatchers("/test/hello").hasAnyAuthority("user,admin")
-                .antMatchers("/login", "/test/error").permitAll();
+                .antMatchers("/").hasAnyAuthority("user,admin")
+                .antMatchers("/login.html", "/test/error").permitAll().anyRequest().authenticated();
+
 
         /**
          * 自定义 403 页面
