@@ -31,9 +31,19 @@ public class WebSocketTestController {
         simpMessageSendingOperations.convertAndSend(messageBody.getDestination(),messageBody);
     }
 
+    /**
+     *
+     * @author liubangdeng
+     * @annotation:
+     * @param principal
+     * @param messageBody
+     * @throws
+     * @return void
+     * @date 2021/4/29 8:43
+     */
     @MessageMapping("testWebSocketByUser")
     public void sendUserMessage(Principal principal,MessageBody messageBody){
-        messageBody.setFrom(principal.getName());
+        messageBody.setFrom(principal.getName());//获取发送者
         simpMessageSendingOperations.convertAndSendToUser(messageBody.getTargetUser(),messageBody.getDestination(),messageBody);
     }
 }

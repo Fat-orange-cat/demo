@@ -3,12 +3,15 @@ package com.example.test.demo.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
@@ -24,6 +27,16 @@ public class springSecurityConfig extends WebSecurityConfigurerAdapter {
     private UserDetailsService userDetailsService;
     @Autowired
     private DataSource dataSource;
+
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtRequestFilter jwtRequestFilter;
+
+    public springSecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                             JwtRequestFilter jwtRequestFilter) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtRequestFilter = jwtRequestFilter;
+    }
+
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -88,9 +101,16 @@ public class springSecurityConfig extends WebSecurityConfigurerAdapter {
                 //.antMatchers("/").hasAuthority("user")
                 //.antMatchers("/test/hello").hasAnyRole("USER,GOD")
                 //.antMatchers("/test/hello").hasRole("GOD")
-                .antMatchers("/").hasAnyAuthority("user,admin")
-                .antMatchers("/login.html", "/test/error").permitAll().anyRequest().authenticated();
-
+                // 对所有的http请求，必须通过授权访问
+                //.antMatchers("/").hasAnyAuthority("user,admin")
+                .antMatchers("/login.html","/login.html", "/test/error","/authenticate").permitAll()
+                .anyRequest().authenticated()
+                .and().exceptionHandling()
+                //AccessDeineHandler 用来解决认证过的用户访问无权限资源时的异常
+                //用来解决匿名用户访问无权限资源时的异常
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         /**
          * 自定义 403 页面
@@ -101,6 +121,13 @@ public class springSecurityConfig extends WebSecurityConfigurerAdapter {
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
 
    /* @Override
     protected void configure(HttpSecurity http) throws Exception {
