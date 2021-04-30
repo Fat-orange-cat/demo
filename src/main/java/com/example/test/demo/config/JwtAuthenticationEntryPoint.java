@@ -15,7 +15,7 @@ import java.io.Serializable;
  * <code>JwtAuthenticationEntryPoint</code>
  * </p>
  *
- * @description: 拒绝每个未经身份验证的请求并发送错误代码401
+ * @description: 拒绝每个未经身份验证的请求并转发 //并发送错误代码401
  * @author: lbd
  * @version: 1.0
  * @date: 2021-04-29
@@ -24,6 +24,6 @@ import java.io.Serializable;
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable {
     @Override
     public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
-        httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        httpServletResponse.sendRedirect("login.html");//.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
 }
